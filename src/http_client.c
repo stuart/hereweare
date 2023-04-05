@@ -7,8 +7,7 @@
 #include "options.h"
 
 /*
-    Sends a message to the Home Assistant server url. 
-
+    Sends a HTTP message to the Home Assistant server url. 
 */
 int notify_home_assistant(struct options *opts, int active)
 {
@@ -21,13 +20,11 @@ int notify_home_assistant(struct options *opts, int active)
         CURLcode res;
         if (active == 1)
         {
-            printf("Sending Active message");
             curl_easy_setopt(curl, CURLOPT_URL, opts->home_assistant_active_url);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, opts->active_json_data);
         }
         else
         {
-            printf("Sending inactive message");
             curl_easy_setopt(curl, CURLOPT_URL, opts->home_assistant_inactive_url);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, opts->inactive_json_data);
         }
@@ -47,7 +44,7 @@ int notify_home_assistant(struct options *opts, int active)
         printf("%ld\n",http_code);
 
         if(res != CURLE_OK){
-            fprintf(stderr, "HTTP Error:");
+            fprintf(stderr, "HTTP Error: ");
             fprintf(stderr, "%s\n", error_buffer);
         }
         curl_easy_cleanup(curl);

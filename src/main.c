@@ -91,9 +91,8 @@ int main(int argc, char **argv)
             print_options(stderr, &opts);
         }
 
-        if (scan_devices(&opts))
+        if (scan_devices(&opts) == SCAN_STATE_ACTIVE)
         {
-            printf("Activity detected\n");
             if (activity == 0)
             {
                 activity_detected(&opts);
@@ -103,7 +102,6 @@ int main(int argc, char **argv)
         }
         else
         {
-             printf("Inctivity detected\n");
             if (activity == 1)
             {
                 inactivity_detected(&opts);

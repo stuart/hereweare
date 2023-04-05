@@ -13,7 +13,8 @@ AC_PROG_SED
 # Checks for libraries.
 PKG_CHECK_MODULES([CURL], [libcurl])
 PKG_CHECK_MODULES([CONFIG], [libconfig])
-PKG_CHECK_MODULES([SYSTEMD], [libsystemd])
+PKG_CHECK_MODULES([SYSTEMD], [libsystemd], [AC_DEFINE([HAVE_SYSTEMD], [1], [Use systemd])])
+PKG_CHECK_MODULES([LIBEVENT], [libevent])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stdlib.h string.h unistd.h])
