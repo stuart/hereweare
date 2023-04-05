@@ -1,0 +1,10 @@
+
+// SPDX-License-Identifier: MIT
+
+Hereweare 
+
+This is a tool for Home assistant presence detection on Linux workstations. 
+It detects wether the keyboard or mouse are active and sends a message to 
+home assistant on a change of status. 
+
+
