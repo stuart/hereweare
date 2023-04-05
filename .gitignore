@@ -1,7 +1,5 @@
-/Makefile
-/src/Makefile
-/Makefile.in
-/src/Makefile.in 
+*/Makefile
+*/Makefile.in
 /aclocal.m4
 /autom4te.cache/
 /config.*
@@ -20,3 +18,4 @@
 *.tar.gz
 *.o
 *~
+/src/hereweare
