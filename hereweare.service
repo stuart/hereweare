@@ -1,8 +1,0 @@
-[Unit]
-Description=Presence Detection for HA.
-
-[Service]
-ExecStart=/usr/local/bin/hereweare
-
-[Install]
-WantedBy=multi-user.target
