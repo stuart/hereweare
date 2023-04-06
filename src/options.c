@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include <libconfig.h>
 #include <string.h>
+#include <errno.h>
 
 #include "options.h"
+#include "log.h"
 
 char *get_device_name(const char *device_command)
 {
@@ -28,15 +30,19 @@ char *get_device_name(const char *device_command)
     /* Cut the list of devices at the first \n */
     trim_len = strcspn(line, "\n");
     device_path = calloc(trim_len + 1, sizeof(char));
-    if(device_path == NULL){
-        perror("Out of memory.");
+    if (device_path == NULL)
+    {
+        HR_LOG_ERR("Out of memory: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     strncpy(device_path, line, trim_len);
-    if(strlen(device_path) > 0){
+    if (strlen(device_path) > 0)
+    {
         printf("Found device: %s\n", device_path);
-    }else{
+    }
+    else
+    {
         printf("Device not found.\n");
     }
     return (device_path);
@@ -44,13 +50,13 @@ char *get_device_name(const char *device_command)
 
 void autoconfigure_mouse(struct options *opts)
 {
-    fprintf(stderr, "mouse_device not configured, will try to find it automatically.\n");
+    HR_LOG_ERR("mouse_device not configured, will try to find it automatically.\n");
     opts->mouse_device = get_device_name("ls /dev/input/by-id/*-event-mouse");
 }
 
 void autoconfigure_keyboard(struct options *opts)
 {
-    fprintf(stderr, "keyboard_device not configured, will try to find it automatically.\n");
+    HR_LOG_ERR("keyboard_device not configured, will try to find it automatically.\n");
     opts->keyboard_device = get_device_name("ls /dev/input/by-id/*-event-kbd");
 }
 
@@ -78,8 +84,7 @@ Inactive JSON Data: %s\n",
             opts->inactive_wait_time,
             opts->scan_time,
             opts->active_json_data,
-            opts->inactive_json_data
-            );
+            opts->inactive_json_data);
 }
 
 struct options load_config(char *config_filename)
@@ -91,7 +96,7 @@ struct options load_config(char *config_filename)
 
     if (config_read_file(&config, config_filename) != CONFIG_TRUE)
     {
-        perror("Cannot read config file");
+        HR_LOG_ERR("Cannot read config file: %s\n", config_filename);
         exit(EXIT_FAILURE);
     }
 
@@ -107,7 +112,7 @@ struct options load_config(char *config_filename)
     const char *path;
     if (config_lookup_string(&config, "home_assistant_active_path", &path) == CONFIG_FALSE)
     {
-        fprintf(stderr, "Missing home_assistant_active_path in config.\n");
+        HR_LOG_ERR("Missing home_assistant_active_path in config.\n");
         opts.home_assistant_active_url = (char *)opts.home_assistant_url;
     }
     else
@@ -119,7 +124,7 @@ struct options load_config(char *config_filename)
 
     if (config_lookup_string(&config, "home_assistant_inactive_path", &path) == CONFIG_FALSE)
     {
-        fprintf(stderr, "Missing home_assistant_inactive_path in config.\n");
+        HR_LOG_ERR("Missing home_assistant_inactive_path in config.\n");
         opts.home_assistant_inactive_url = (char *)opts.home_assistant_url;
     }
     else
@@ -144,10 +149,10 @@ struct options load_config(char *config_filename)
         opts.scan_time = DEFAULT_SCAN_TIME;
 
     if (config_lookup_string(&config, "home_assistant_active_json_data", &opts.active_json_data))
-        opts.active_json_data = "{}";
+        opts.active_json_data = DEFAULT_JSON_DATA;
 
     if (config_lookup_string(&config, "home_assistant_inactive_json_data", &opts.inactive_json_data))
-        opts.inactive_json_data = "{}";
+        opts.inactive_json_data = DEFAULT_JSON_DATA;
 
     return opts;
 }

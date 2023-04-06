@@ -5,9 +5,10 @@
 #include <curl/curl.h>
 
 #include "options.h"
+#include "log.h"
 
 /*
-    Sends a HTTP message to the Home Assistant server url. 
+    Sends a HTTP message to the Home Assistant server url.
 */
 int notify_home_assistant(struct options *opts, int active)
 {
@@ -31,7 +32,7 @@ int notify_home_assistant(struct options *opts, int active)
 
         curl_easy_setopt(curl, CURLOPT_PORT, 8123);
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
-        
+
         curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
         struct curl_slist *headers = NULL;
         headers = curl_slist_append(headers, "Accept: application/json");
@@ -41,18 +42,17 @@ int notify_home_assistant(struct options *opts, int active)
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
         res = curl_easy_perform(curl);
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        printf("%ld\n",http_code);
 
-        if(res != CURLE_OK){
-            fprintf(stderr, "HTTP Error: ");
-            fprintf(stderr, "%s\n", error_buffer);
+        if (res != CURLE_OK)
+        {
+            HR_LOG_ERR("HTTP Error: ");
+            HR_LOG_ERR("%s\n", error_buffer);
         }
         curl_easy_cleanup(curl);
 
-        
         return (res);
     }
-    
+
     return (-1);
 }
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+#pragma once
 #define DEFAULT_CONFIG_FILE "/etc/hereweare.config"
 #define DEFAULT_MOUSE_DEVICE ""
 #define DEFAULT_KEYBOARD_DEVICE ""

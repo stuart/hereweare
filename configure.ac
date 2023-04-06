@@ -17,8 +17,10 @@ PKG_CHECK_MODULES([SYSTEMD], [libsystemd], [AC_DEFINE([HAVE_SYSTEMD], [1], [Use 
 PKG_CHECK_MODULES([LIBEVENT], [libevent])
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h unistd.h signal.h sys/types.h])
 AC_CHECK_HEADERS([curl/curl.h])
+AC_CHECK_HEADERS([syslog.h])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 

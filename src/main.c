@@ -5,25 +5,36 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
-#include <systemd/sd-daemon.h>
-#include <getopt.h> 
+#include "config.h"
 
+#ifdef HAVE_SYSTEMD
+#include <systemd/sd-daemon.h>
+#else
+#include "daemon.h"
+#endif
+
+#include <getopt.h>
 #include "options.h"
 #include "scan.h"
 #include "http_client.h"
+#include "log.h"
 
 int must_reload_config = 0;
 int must_shutdown = 0;
 
 void handle_sigterm(int __attribute__((unused)) signal)
 {
+#ifdef HAVE_SYSTEMD
     sd_notify(0, "STOPPING=1");
+#endif
     must_shutdown = 1;
 }
 
 void handle_sighup(int __attribute__((unused)) signal)
 {
+#ifdef HAVE_SYSTEMD
     sd_notify(0, "RELOADING=1");
+#endif
     must_reload_config = 1;
 }
 
@@ -72,14 +83,34 @@ int main(int argc, char **argv)
     }
 
     struct options opts = load_config(config_filename);
- 
-    fprintf(stderr, "Started hereweare.\n");
-    print_options(stderr, &opts);
+    print_options(stdout, &opts);
 
-    signal(SIGTERM, handle_sigterm);
-    signal(SIGHUP, handle_sighup);
+#ifndef HAVE_SYSTEMD
+    init_logging();
+    if (daemonize(BD_NO_REOPEN_STD_FDS | BD_NO_CLOSE_FILES) != 0)
+    {
+        HR_LOG_ERR("Could not create daemon process.");
+        exit(EXIT_FAILURE);
+    }
+#endif
+
+    HR_LOG_INFO("Started %s.\n", argv[0]);
+
+    if (signal(SIGTERM, handle_sigterm) != 0)
+    {
+        HR_LOG_ERR("Cannot set signal hander SIGTERM.\n");
+    }
+
+    if (signal(SIGHUP, handle_sighup) != 0)
+    {
+        HR_LOG_ERR("Cannot set signal hander SIGHUP.\n");
+    }
+
+#ifdef HAVE_SYSTEMD
     sd_notify(0, "READY=1");
+#endif
 
+    /* Main scanning loop */
     while (must_shutdown == 0)
     {
         if (must_reload_config)
@@ -87,7 +118,7 @@ int main(int argc, char **argv)
             free_opts(&opts);
             opts = load_config(config_filename);
             must_reload_config = 0;
-            fprintf(stderr, "Reloaded config.\n");
+            HR_LOG_ERR("Reloaded config.\n");
             print_options(stderr, &opts);
         }
 
